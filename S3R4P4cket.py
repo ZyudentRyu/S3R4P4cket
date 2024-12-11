@@ -10,13 +10,14 @@ def get_user_input():
     repeat_count = int(input("Enter the number of capture repetitions: "))
     interface = input("Enter the network interface name (e.g., enp0s3): ")
     capture_dir = input("Enter the directory to save the capture results (e.g., /home/ubuntu/captures): ")
+    file_name = input("Enter the file name: ")
 
     # Ensure the directory exists
     if not os.path.exists(capture_dir):
         print("Directory {} does not exist. Creating directory...".format(capture_dir))
         os.makedirs(capture_dir)
 
-    return start_time, duration, repeat_count, interface, capture_dir
+    return start_time, duration, repeat_count, interface, capture_dir, file_name
 
 def wait_until_start_time(start_time):
     """Wait until the specified time to start the capture"""
@@ -28,9 +29,9 @@ def wait_until_start_time(start_time):
         # Wait 1 second before checking the time again
         time.sleep(1)
 
-def start_capture(i, duration, interface, capture_dir):
+def start_capture(i, duration, interface, capture_dir, file_name):
     """Run tshark to capture packets for the specified duration"""
-    capture_filename = os.path.join(capture_dir, "capturing{}.pcap".format(i))  # Using os.path.join for cross-platform compatibility
+    capture_filename = os.path.join(capture_dir, f"{file_name}-{i}.pcap".format(i))  # Using os.path.join for cross-platform compatibility
     print("Starting capture {}...".format(i))
     # Run the tshark command using subprocess
     subprocess.run(["sudo", "tshark", "-i", interface, "-a", "duration:{}".format(duration), "-w", capture_filename])
@@ -38,14 +39,14 @@ def start_capture(i, duration, interface, capture_dir):
 
 def main():
     # Get user input
-    start_time, duration, repeat_count, interface, capture_dir = get_user_input()
+    start_time, duration, repeat_count, interface, capture_dir, file_name = get_user_input()
 
     # Wait until the specified start time
     wait_until_start_time(start_time)
 
     # Start capture according to the specified repetition count
     for i in range(1, repeat_count + 1):
-        start_capture(i, duration, interface, capture_dir)
+        start_capture(i, duration, interface, capture_dir, file_name)
 
     print("All captures completed!")
 
